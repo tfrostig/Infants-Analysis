@@ -15,7 +15,7 @@ lapply(pacakge.list, require, character.only = TRUE)
 to.install <- !('RSEE' %in% installed.packages()[,"Package"])
 
 if (to.install) {
-  install.packages(paste0(here(),'/RSEE_1.5.2.zip'), type = "win.binary", repos = NULL)
+  install.packages(paste0(here::here(),'/RSEE_1.5.2.zip'), type = "win.binary", repos = NULL)
 }
 
 library('RSEE')

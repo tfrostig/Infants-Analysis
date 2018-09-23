@@ -15,7 +15,7 @@ editor_options:
 
 
 
-source.dir <- dirname(getwd())
+source.dir <- dirname(here::here())
 setwd(source.dir)
 
 set.seed(999) 
