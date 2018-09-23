@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537443140856.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3549603468",
+    "id" : "E6EC2D21",
+    "lastKnownWriteTime" : 1537445343,
+    "last_content_update" : 1537445343897,
+    "path" : "C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/R Scripts/Step 2 - Analysis.Rmd",
+    "project_path" : "R Scripts/Step 2 - Analysis.Rmd",
+    "properties" : {
+        "chunk_output_type" : "console",
+        "cursorPosition" : "20,14",
+        "scrollLine" : "17"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
