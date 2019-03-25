@@ -1,7 +1,7 @@
 ---
-title: "Step 2 - Analysis (figures and tests)"
+title: "Step 2 - Analysis (figures and tests) - Normalization"
 author: "Tzviel Frostig"
-date: "2018 M09 20"
+date: "2018 M11 12"
 output:
   html_document:
     df_print: paged
@@ -12,10 +12,10 @@ editor_options:
 
 
 ```{r setup, include=FALSE}
+#source.dir <- 'C:/Users/Tzviel/Google Drive/eLife - Final Submission/Review/Infants-Analysis-Normalized'
+#source.dir <- 'G:/Tzviel Documents/eLife - Final Submission/Review/Infants-Analysis-Normalized'
 
-
-
-source.dir <- dirname(here::here())
+source.dir  <- here::here()
 setwd(source.dir)
 
 set.seed(999) 
@@ -75,6 +75,7 @@ Parameters used are:
 
 
 plot.heat.list <- list()
+count.heat     <- list()
 time.spent.vec <- NA
 for (j in 1:nrow(parameter.DF)) { 
   temp.obj.list  <- object.list[[j]]
@@ -93,6 +94,7 @@ for (j in 1:nrow(parameter.DF)) {
                             n = 63)
   
   temp.heat  <- heatmap.temp$Heatmap
+  count.heat[[j]] <- heatmap.temp$Heatmap
   temp.visit <- heatmap.temp$Visit
   temp.arc   <- heatmap.temp$Arcs
   #temp.tess  <- heatmap.temp$Voroni ## Not used 
@@ -260,9 +262,6 @@ for (j in 1:nrow(parameter.DF)) {
     labs(caption = parameter.DF$Name[j]) + theme(plot.caption = element_text(hjust=0.5, size = 14))
 
 }
-
-
-
 ```
 
 
@@ -449,9 +448,6 @@ for (j in 1:nrow(parameter.DF)) {
 
 dist.df <- do.call(rbind, dist.list)
 
-
-
-
 ```
 
 
@@ -473,9 +469,6 @@ dist.plot <- ggplot(data = TD.dat  , aes(x = round(Frame / (25 * 60) , 2), y = D
   
 dist.plot + facet_grid(Name ~ .) + theme(strip.text.y = element_text(size = 22),
                                          plot.title = element_text(size = 22))
-
-
-
 
 ```
 
@@ -506,35 +499,39 @@ dist.plot + facet_grid(Name ~ .) + theme(strip.text.y = element_text(size = 22),
 
 ```{r Testing the difference in excursions}
 
+### Adding the length of the session 
+parameter.DF[ ,'Length'] <- (parameter.DF$End - parameter.DF$Begin) / (25 * 60) 
+dist.df   <- left_join(dist.df, parameter.DF[ ,c('Name', 'Length')], by = 'Name')
+
 #### Testing difference 
 test.mat <- dist.df %>% 
-  select(Excursions, Name, IS.TD) %>%
+  select(Excursions, Name, IS.TD, Length) %>%
   group_by(Name) %>% 
   dplyr::summarise('Number_Excursions' = sum(!is.na(Excursions)),
-                   'IS.TD'= mean(IS.TD))
+                   'Length_Min' = mean(Length),
+                   'IS.TD'= mean(IS.TD)) %>% 
+  dplyr::mutate('Number_Excursions_Per_Min' = Number_Excursions / Length_Min)
 
-td.ex <- test.mat %>% filter(IS.TD == TRUE) %>% select(Number_Excursions) %>% unlist()
-ntd.ex <- test.mat %>% filter(IS.TD == FALSE) %>% select(Number_Excursions) %>% unlist()
+
+td.ex  <- test.mat %>% filter(IS.TD == TRUE) %>% select(Number_Excursions_Per_Min) %>% unlist()
+ntd.ex <- test.mat %>% filter(IS.TD == FALSE) %>% select(Number_Excursions_Per_Min) %>% unlist()
 wilcox.excursion.test <- wilcox.test(td.ex, ntd.ex)
 
 
 abs.ex.diff <- abs(mean(td.ex) - mean(ntd.ex))
 
 
-sd.ex <- (sd(td.ex)^2 * (length(td.ex) - 1) + sd(ntd.ex)^2 * (length(ntd.ex) - 1)) /
+sd.ex <- (sd(td.ex)^2 * (length(td.ex) - 1) + 
+            sd(ntd.ex)^2 * (length(ntd.ex) - 1)) /
         (length(ntd.ex) + length(td.ex) - 2)
 
 
-
-kable(data.frame('Test' = '# Of excursions',
+kable(data.frame('Test' = '# Of Excursions Per Minute',
                  'Wilcoxon p-value' =  wilcox.excursion.test$p.value, 
                  'Abs Difference' = mean(abs.ex.diff) ,
                  'Statistic' = wilcox.excursion.test$statistic,
                  'SD' = sqrt(sd.ex),
                  'Effect Size' = median(outer(td.ex, ntd.ex, '-')) / sqrt(sd.ex)), row.names = FALSE)
-
-
-
 
 ```
 
@@ -614,8 +611,9 @@ for (i in 1:nrow(parameter.DF)) {
   }  
 }
 
-
-vis.data.frame.perm <- vis.data.frame
+vis.data.frame <- left_join(vis.data.frame, parameter.DF[ , c('Name', 'Length')])
+vis.data.frame[ , 'Excursion'] <- vis.data.frame$Excursion / vis.data.frame$Length
+vis.data.frame.perm <- vis.data.frame 
 x <- aggregate(Excursion ~ TD + Distance, vis.data.frame, mean)
 true.ex <- mean((subset(x, TD == TRUE)[,3] - subset(x, TD == FALSE)[,3])^2)
 temp.ex <- NA
@@ -667,8 +665,8 @@ CI.cover.plot <- ggplot(df.cover, aes(x = Radius, y = Percentage_Covered, color 
 ## Not Averaged 
 
 ## By Condition 
-vis.plot <- ggplot(vis.data.frame, aes(x = Distance, y = Excursion, color = TD, group = Name)) + geom_line(size = 1.25) + ggtitle("Number of Visits to Mother") +
-  labs( y = "Number Of Visits", x ="Distance from mother (cm)") + theme(text = element_text(size=22), legend.position = 'none') + opts.perm
+vis.plot <- ggplot(vis.data.frame, aes(x = Distance, y = Excursion, color = TD, group = Name)) + geom_line(size = 1.25) + ggtitle("Number Of Visits Per Minute To Mother") +
+  labs( y = "Number Of Excursions Per Minute", x ="Distance from mother (cm)") + theme(text = element_text(size=22), legend.position = 'none') + opts.perm
 
 ## Averaged 
 df.visit <- aggregate(Excursion ~ TD + Distance, vis.data.frame, FUN = function(x) c('Visits' = mean(x),                                                                           'SD' = sd(x)))
@@ -677,8 +675,8 @@ df.visit <- do.call(data.frame, df.visit)
 colnames(df.visit) <- c('Group', 'Radius', 'Visits', 'SD')
 
 ## With CI
-CI.vis.plot <- ggplot(df.visit, aes(x = Radius, y = Visits, color = Group)) + geom_line(size = 1.5) + geom_ribbon(aes(ymin = Visits - 1.96 * SD * sqrt(1 / 6), ymax = Visits + 1.96 * SD * sqrt(1 / 6), alpha = 0.05 , fill = Group), show.legend = FALSE) +  ggtitle("Average Number of Visits To Mother") +
-  labs( y = "Number Of Visits", x ="Distance from mother (cm)")  +  theme(text = element_text(size=22), legend.position = 'none') + opts.perm
+CI.vis.plot <- ggplot(df.visit, aes(x = Radius, y = Visits, color = Group)) + geom_line(size = 1.5) + geom_ribbon(aes(ymin = Visits - 1.96 * SD * sqrt(1 / 6), ymax = Visits + 1.96 * SD * sqrt(1 / 6), alpha = 0.05 , fill = Group), show.legend = FALSE) +  ggtitle("Average Number Of Visits Per Minute To Mother") +
+  labs( y = "Number Of Excursions Per Minute", x ="Distance from mother (cm)")  +  theme(text = element_text(size=22), legend.position = 'none') + opts.perm
 
 grid.arrange(cond.plot, CI.cover.plot, vis.plot, CI.vis.plot, layout_matrix = rbind(c(1,2),c(3,4))) 
 
@@ -691,7 +689,7 @@ Testing the hypothesis that the mean curve of the TD infants is higher than that
 
 ```{r}
 
-kable(data.frame('Tests' = c('% Near mother ~ radius', '# Excursions ~ radius'),
+kable(data.frame('Tests' = c('% Near mother ~ radius', '# Excursions per minute ~ Radius'),
                  'Distance between mean curves' = c(sqrt(true.dist), sqrt(true.ex)), 
                  'Permutation P-value' = c(p.val.mom.dist, p.val.mom.excu),
                  'Adjusted BH' = p.adjust(c(p.val.mom.dist, p.val.mom.excu), 'BH')))
@@ -858,9 +856,14 @@ ProgSpeed <- function(df) {
 speed.vec.only.prog <- unlist(lapply(smooth.see.list, ProgSpeed))
 
 ### Testing Room Coverage 
-cover.vec <-  unlist(lapply(smooth.see.list, CountMap)) 
+cover.vec  <-  sapply(smooth.see.list, CountMap) 
+#cover.vec  <-  sapply(count.heat, function(x) sum(x[ ,3] > 0)) / parameter.DF$Length
 
-touch.avg.temp <- NA; touch.num.temp <- NA; dist.temp <- NA; temp.ling <- NA; 
+
+
+touch.avg.temp <- NA; touch.num.temp <- NA; dist.temp <- NA; temp.ling <- NA; new.touch <- NA; 
+
+
 ### Touches of Mother
 for (i in 1:length(smooth.see.list)) { 
 
@@ -874,27 +877,26 @@ for (i in 1:length(smooth.see.list)) {
   
   touch.avg.temp[i]     <- mean(temp.touch)
   ## Number of toching 
-  touch.num.temp[i]     <- nrow(Group(temp.df[as.logical(temp.touch),'Frames']))
+  touch.num.temp[i]     <- nrow(Group(temp.df[as.logical(temp.touch), 'Frames']))
   ## Distance normalised outside mother 80CM
   ## Mom Location 
-  temp.mom.cent <- center.list[[i]][['Mother']][1:2]
+  temp.mom.cent     <- center.list[[i]][['Mother']][1:2]
   out.mom.vec.100   <- sqrt((temp.df$x - temp.mom.cent[1])^2 + (temp.df$y - temp.mom.cent[2])^2) > 100
 
   dist.temp[i] <- sum(sqrt(temp.df[out.mom.vec.100,'v.x']^2 + temp.df[out.mom.vec.100,'v.y']^2)) / sum(out.mom.vec.100)
   ## Lingering Normalized 
   temp.ling[i] <- sum(!temp.df$prog.vec) / nrow(temp.df)
 }
-
 ### Segments to Mother 
 
 ### Transformed data 
 test.df <- data.frame('Name' = parameter.DF$Name, 
-                      'Excursions.100.CM' = sqrt(vis.100), ## Square root 
+                      'Excursions.100.CM.Per.Minute' = sqrt(vis.100), ## Square root 
                       'Time.Mother.Radius.100.CM' = Logit(time.spent.100), ## logit 
                       'Speed.Prog' = speed.vec.only.prog,
                       'Avg.Cover' = Logit(cover.vec), ## logit  maybe can add time.spent.vec
                       'Speed.Outside.Mother.Radius.100.CM' = dist.temp,
-                      'Touches.Num' = sqrt(touch.num.temp), ## square root 
+                      'Touches.Num.Per.Min' = sqrt(touch.num.temp / parameter.DF$Length), ## square root 
                       'Touches.Duration' = Logit(touch.avg.temp), ## logit 
                       'TD' = parameter.DF[ ,'IS.TD'])
 
@@ -905,64 +907,64 @@ swr = function(string, nwrap=25) {
 
 ### Original without transformations 
 org.test.df <- data.frame('Name' = parameter.DF$Name, 
-                          'Excursions.100.CM' = (vis.100), ## Square root 
+                          'Excursions.100.CM.Per.Minute' = (vis.100), ## Square root 
                           'Time.Mother.Radius.100.CM' = Logit(time.spent.100), ## logit 
                           'Speed.Prog' = speed.vec.only.prog,
                           'Avg.Cover' = (cover.vec), ## logit 
                           'Speed.Outside.Mother.Radius.100.CM' = dist.temp,
-                          'Touches.Num' = (touch.num.temp), ## square root 
+                          'Touches.Num.Per.Min' = (touch.num.temp), ## square root 
                           'Touches.Duration' = (touch.avg.temp), ## logit 
                           'TD' = parameter.DF[ ,'IS.TD'])
-
-
-
-
 
 p.vec      <- rep(NA, 6)
 diff.vec   <- rep(NA, 6)
 W.vec      <- rep(NA, 6) 
 effect.vec <- rep(NA, 6) 
 sd.vec     <- rep(NA, 6)
-
+name.vec   <- rep(NA, 6)
 for (i in 2:8) { 
-  x.td  <- org.test.df[org.test.df['TD'] == TRUE, i]
-  x.ntd <- org.test.df[org.test.df['TD'] == FALSE, i]
-  temp.test  <- wilcox.test(x.td, x.ntd)
-  sd.vec[i-1]     <- (sd(x.td)^2 * (length(x.td) - 1) + sd(x.ntd)^2 * (length(x.ntd) - 1)) / 
-                      (length(x.td) + length(x.ntd) - 2 )
-  effect.vec[i-1] <- median(outer(x.td, x.ntd, `-`)) / sd(c(x.td, x.ntd))
+  x.td  <- test.df[test.df['TD'] == TRUE, i]
+  x.ntd <- test.df[test.df['TD'] == FALSE, i]
+  temp.test  <- wilcox.test(x.td, x.ntd, exact = TRUE)
+  sd.vec[i-1]     <- sqrt((sd(x.td)^2 * (length(x.td) - 1) + sd(x.ntd)^2 * (length(x.ntd) - 1)) / 
+                      (length(x.td) + length(x.ntd) - 2))
   p.vec[i-1]      <- temp.test$p.value
   W.vec[i-1]      <- temp.test$statistic
   diff.vec[i-1]   <- abs(mean(x.td) - mean(x.ntd))
+  effect.vec[i-1] <- diff.vec[i-1] / sd.vec[i-1]
+  name.vec[i -1]  <- colnames(test.df[i]) 
 }
 
-p.vec.adj <- p.adjust(p.vec, 'BH')
+p.vec.adj    <- p.adjust(p.vec, 'BH')
 names(p.vec) <- colnames(test.df[ ,2:8])
+
+k <- length(p.vec)
 
 
 
 box.df <- test.df %>% 
   select(-Name) %>%
-  plyr::rename(c('Excursions.100.CM' = paste('Sqrt Number \n of Excursions 100 (cm) \n P =', round(p.vec[1], 4)),
+  plyr::rename(c('Excursions.100.CM.Per.Minute' = paste('Sqrt Number of \n Excursions Per Minute 100 (cm) \n P =', round(p.vec[1], 4)),
                  'Time.Mother.Radius.100.CM' = paste('Logit % of Time \n Near Mother 100 (cm) \n P =', round(p.vec[2], 4)), 
                  'Speed.Prog' = paste('Progression Speed (cm/sec) \n P =', round(p.vec[3], 4)), 
                  'Avg.Cover' = paste('Logit % Room Covered \n P =', round(p.vec[4], 4)), 
-                 'Touches.Num' = paste('Sqrt # Contact Episodes \n  P =', round(p.vec[5], 4)), 
-                 'Touches.Duration' = paste('Logit % Of Contact Time \n  P =', round(p.vec[6], 4)),
-                 'Speed.Outside.Mother.Radius.100.CM' = paste('Speed (cm/sec) outside of \n mother\'s vicinity 100 (cm) \n  P =', round(p.vec[7], 4)))) %>% 
+                 'Touches.Num.Per.Min' = paste('Sqrt # \n Contact Episodes Normalized \n  P =', round(p.vec[6], 4)), 
+                 'Touches.Duration' = paste('Logit % \n Of Contact Time \n  P =', round(p.vec[7], 4)),
+                 'Speed.Outside.Mother.Radius.100.CM' = paste('Speed (cm/sec) outside of \n mother\'s vicinity 100 (cm) \n  P =', round(p.vec[5], 4)))) %>% 
   melt(id.var = 'TD') 
 box.df[,'TD'] <- factor(box.df[,'TD'], levels = c('TRUE', 'FALSE'))
 
 ```
 
 
-Effect size is given by $\frac{Med_{i,j}(x_i - y_j)}{SD}$. All tests conducted are Wilcoxon sum rank test, which do not require assumptions regarding the underlying distribution of observations. 
+Effect size is given by $\frac{|\bar{x} - \bar{y}|}{SD}$. All tests conducted are Wilcoxon sum rank test, which do not require assumptions regarding the underlying distribution of observations. 
 
 
 ````{r Figure 7, fig.width = 17, fig.height = 11}
 ### Plotting the boxplots 
 ggplot(box.df, aes(y = value, x = variable, color = TD, fill = TD, group = TD)) + 
   geom_boxplot(alpha = 0.25, notch = FALSE) + 
+  #geom_point(position = position_dodge(width=0.75)) + 
   ggtitle("") + 
   scale_fill_manual(values = c('blue', 'red'), labels = c("TD", "NTD")) + 
   scale_color_manual(values = c('blue', 'red'), labels = c("TD", "NTD")) +
@@ -979,15 +981,88 @@ ggplot(box.df, aes(y = value, x = variable, color = TD, fill = TD, group = TD)) 
         legend.position = c(0.8, 0.35))
        # legend.position = 'bottom')  
 
-kable(data.frame('Tests' = colnames(test.df[ ,2:8]),
-                 'Un-Adjusted P-value' = p.vec, 
-                 'BH P-value' = p.vec.adj,
-                 'Abs Difference' = diff.vec,
-                 'Statistic' = W.vec,
-                 'SD' = sqrt(sd.vec),
-                 'Effect Size' = effect.vec / sqrt(sd.vec)), row.names = FALSE)
+final.test.data <- data.frame('Tests' = colnames(test.df[ ,2:8]),
+                              'Un-Adjusted P-value' = p.vec, 
+                              'BH P-value' = p.vec.adj,
+                              'Abs Difference' = diff.vec,
+                              'Statistic' = W.vec,
+                              'SD' = (sd.vec),
+                              'Effect Size' = diff.vec / (sd.vec)) %>% 
+  arrange(Un.Adjusted.P.value) 
+
+kable(final.test.data, row.names = FALSE)
 
 
 ```
 
+
+### T - Tests 
+```{r}
+
+### Transformed data 
+test.df <- data.frame('Name' = parameter.DF$Name, 
+                      'Excursions.100.CM' = sqrt(vis.100), ## Square root 
+                      'Time.Mother.Radius.100.CM' = Logit(time.spent.100), ## logit 
+                      'Speed.Prog' = speed.vec.only.prog,
+                      'Avg.Cover' = Logit(cover.vec), ## logit  maybe can add time.spent.vec
+                      'Speed.Outside.Mother.Radius.100.CM' = dist.temp,
+                      'Touches.Num' = sqrt(touch.num.temp / parameter.DF$Length), ## square root 
+                      'Touches.Duration' = Logit(touch.avg.temp), ## logit 
+                      'TD' = parameter.DF[ ,'IS.TD'])
+
+## Function to control string length 
+swr = function(string, nwrap=25) {
+  paste(strwrap(string, width=nwrap), collapse="\n")
+}
+
+
+p.vec      <- rep(NA, 6)
+diff.vec   <- rep(NA, 6)
+W.vec      <- rep(NA, 6) 
+effect.vec <- rep(NA, 6) 
+sd.vec     <- rep(NA, 6)
+
+for (i in 2:8) { 
+  x.td  <- test.df[test.df['TD'] == TRUE, i]
+  x.ntd <- test.df[test.df['TD'] == FALSE, i]
+  temp.test  <- t.test(x.td, x.ntd)
+  sd.vec[i-1]     <- sqrt((sd(x.td)^2 * (length(x.td) - 1) + sd(x.ntd)^2 * (length(x.ntd) - 1)) / 
+                      (length(x.td) + length(x.ntd) - 2 ))
+  p.vec[i-1]      <- temp.test$p.value
+  W.vec[i-1]      <- temp.test$statistic
+  diff.vec[i-1]   <- abs(mean(x.td) - mean(x.ntd))
+  effect.vec[i-1] <- diff.vec[i-1] / sd.vec[i-1]
+
+}
+
+p.vec.adj    <- p.adjust(p.vec, 'BH')
+names(p.vec) <- colnames(test.df[ ,2:8])
+
+k <- length(p.vec)
+
+
+final.test.data <- data.frame('Tests' = colnames(test.df[ ,2:8]),
+                              'Un-Adjusted P-value' = p.vec, 
+                              'BH P-value' = p.vec.adj,
+                              'Abs Difference' = diff.vec,
+                              'Statistic' = W.vec,
+                              'SD' = (sd.vec),
+                              'Effect Size' = diff.vec / (sd.vec)) %>% 
+  arrange(Un.Adjusted.P.value) 
+
+kable(final.test.data, row.names = FALSE)
+
+```
+
+### Testing Length 
+
+```{r}
+
+t.test(parameter.DF$Length[parameter.DF$IS.TD == TRUE],
+       parameter.DF$Length[parameter.DF$IS.TD == FALSE], exact = TRUE)
+mean(parameter.DF$Length[parameter.DF$IS.TD == TRUE])
+mean(parameter.DF$Length[parameter.DF$IS.TD == FALSE])
+sd(parameter.DF$Length[parameter.DF$IS.TD == TRUE])
+sd(parameter.DF$Length[parameter.DF$IS.TD == FALSE])
+```
 
