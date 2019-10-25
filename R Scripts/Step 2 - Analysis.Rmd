@@ -3,6 +3,7 @@ title: "Step 2 - Analysis (figures and tests) - Normalization"
 author: "Tzviel Frostig"
 date: "2018 M11 12"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
   word_document: default
@@ -57,6 +58,8 @@ opts.perm <- theme(plot.title = element_text(size = 22),
                    strip.text.y = element_text(size = 18),
                    strip.text.x = element_text(size = 18))
 
+
+
 ```
 
 ### Heatmaps (Figure 2 a, b) 
@@ -104,33 +107,30 @@ for (j in 1:nrow(parameter.DF)) {
   }
   temp.plot <- temp.plot + 
   DrawRectangleGG2(mother.coord, col.temp = 'green', alpha = 0.1) +
-  labs(caption = parameter.DF$Name[j]) + theme(plot.caption = element_text(hjust=0.5, size=23))
+  labs(caption = paste0(parameter.DF$Name[j])) + 
+    theme(plot.caption = element_text(hjust=0.5, size=23))
   plot.heat.list[[j]] <- temp.plot
   time.spent.vec[j] <- mean(temp.heat[,3] > 0)
 }
 
 ```
 
-#### Plotting (Figure 1 a) 
+#### Plotting (Figure 2) 
 
-```{r Figure 2 a - heatmap TD,fig.height= 12, fig.width=16}
+```{r Figure 2 - heatmap TD,fig.height= 12, fig.width=16}
 
 grid.arrange(plot.heat.list[[3]] + opts, plot.heat.list[[5]] + opts, plot.heat.list[[6]] + opts,
-             plot.heat.list[[8]] + opts, plot.heat.list[[9]] + opts , plot.heat.list[[11]] + opts
+             plot.heat.list[[8]] + opts,  plot.heat.list[[11]] + opts
              ,nrow = 2 , ncol = 3)
-
-
-
-
 ```
 
-#### Plotting (Figure 2 b)
+#### Plotting (Figure 3)
 
-```{r Figure 2 b - Heatmap NTD, fig.height= 12, fig.width=16}
+```{r Figure 2 b - Heatmap NTD, fig.height= 18, fig.width=16}
 
 grid.arrange(plot.heat.list[[1]] + opts, plot.heat.list[[2]] + opts, plot.heat.list[[4]] + opts,
-             plot.heat.list[[7]] + opts, plot.heat.list[[10]] + opts, plot.heat.list[[12]] + opts
-             ,nrow = 2 , ncol = 3 )
+             plot.heat.list[[7]] + opts, plot.heat.list[[10]] + opts, plot.heat.list[[12]] + opts,
+             plot.heat.list[[9]] + opts, nrow = 3 , ncol = 3 )
 ```
 
 
@@ -259,7 +259,7 @@ for (j in 1:nrow(parameter.DF)) {
   
   plot.list[[j]] <- temp.plot +  
     coord_fixed(ratio = 1) + 
-    labs(caption = parameter.DF$Name[j]) + theme(plot.caption = element_text(hjust=0.5, size = 14))
+    labs(caption =  paste0(parameter.DF$Name[j])) + theme(plot.caption = element_text(hjust=0.5, size = 12), legend.box = 'vertical')
 
 }
 ```
@@ -281,22 +281,37 @@ NTD.int.plot <- grid.arrange(plot.list[[1]] + opts, plot.list[[2]] + opts, plot.
 line.plot <- ggplot(NULL) + geom_abline(slope = 0, intercept = 0.5, size = 3) + opts
 null.plot <- ggplot(NULL) + opts
 
-A=textGrob("a", gp=gpar(fontface="bold", fontsize = 24))
-B=textGrob("b", gp=gpar(fontface="bold", fontsize = 24))
-
-lay.mat <- rbind(c(1, rep(2, 11)),
-                 t(replicate(8, c(6, rep(2, 11)))),
-                 rep(3, 12),
-                 c(4, rep(5, 11)),
-                 t(replicate(8, c(6, rep(5, 11)))))
+A=textGrob("b NTD", gp=gpar(fontface="bold", fontsize = 24))
+B=textGrob("a TD", gp=gpar(fontface="bold", fontsize = 24))
+# 
+# lay.mat <- rbind(c(1, rep(2, 11)),
+#                  t(replicate(8, c(6, rep(2, 11)))),
+#                  rep(3, 12),
+#                  c(4, rep(5, 11)),
+#                  t(replicate(8, c(6, rep(5, 11)))))
 ```
 
 #### Plotting final plots 
 
-```{r Figure 3 - Interaction plots (only mother),fig.height = 14, fig.width=10, dpi = 500}
+```{r Figure 4 - Interaction plots (only mother),fig.height = 15, fig.width=10, dpi = 500}
+MatMake <- function(x, num) {matrix(x, ncol = num, nrow = num)}
 
-grid.arrange(A, TD.int.plot, line.plot, B, NTD.int.plot, null.plot, layout_matrix = lay.mat, padding = unit(0.1, "line"))
+#grid.arrange(A, TD.int.plot, line.plot, B, NTD.int.plot, null.plot, layout_matrix = lay.mat, padding = unit(0.1, "line"))
+lay.mat <- cbind(MatMake(1, 4), MatMake(2, 4), MatMake(3, 4))
+lay.mat <- rbind(lay.mat, (lay.mat + 3),
+                 rep(7, 9),
+                 (lay.mat + 7), (lay.mat + 11), (lay.mat + 14))
+              
+              
 
+grid.arrange(B, plot.list[[3]] + opts, plot.list[[5]] + opts, 
+             plot.list[[6]] + opts, plot.list[[8]] + opts, plot.list[[11]] + opts,
+             line.plot,
+             A, null.plot, plot.list[[1]] + opts, plot.list[[2]] + opts, plot.list[[4]] + opts,
+             plot.list[[7]] + opts, plot.list[[9]] + opts, plot.list[[10]] + opts, 
+             plot.list[[12]] + opts,
+             
+             padding = unit(0.1, "line"), layout_matrix = lay.mat)
 ```
 
 
@@ -350,14 +365,13 @@ for (j in 1:nrow(parameter.DF)) {
   plot.list[[j]] <- temp.plot +  
      scale_colour_manual(values = cols, name = element_blank(), drop = FALSE) +
      coord_fixed(ratio = 1) +
-    theme(legend.position = 'top', legend.text = element_text(size = 15),
-          legend.key.height = unit(0.7, "in"), legend.key.width = unit(0.75, "in")) + 
+    theme(legend.text = element_text(size = 14),
+          legend.key.height = unit(0.5, "in"), legend.key.width = unit(0.75, "in")) + 
     guides(colour = guide_legend(override.aes = list(size = 5))) +
-       labs(caption = parameter.DF$Name[j]) + 
-    theme(plot.caption = element_text(hjust=0.5, size = 16)) 
+       labs(caption = paste0(parameter.DF$Name[j])) + 
+    theme(plot.caption = element_text(hjust=0.5, size = 16), legend.box = 'vertical') 
 
 } 
-
 
 ## Creating plot for legend 
 # legend.plot <- ggplot(data.frame()) + geom_point() + scale_colour_manual(values = cols, labels = c(obj.names), name = 'Legend', drop = FALSE) 
@@ -385,21 +399,37 @@ NTD.int.plot <- grid.arrange(plot.list[[1]] + opts, plot.list[[2]] + opts, plot.
 line.plot <- ggplot(NULL) + geom_abline(slope = 0, intercept = 0.5, size = 3) + opts
 null.plot <- ggplot(NULL) + opts
 
-A=textGrob("a", gp=gpar(fontface="bold", fontsize = 24))
-B=textGrob("b", gp=gpar(fontface="bold", fontsize = 24))
+A=textGrob("b NTD", gp=gpar(fontface="bold", fontsize = 24))
+B=textGrob("a TD", gp=gpar(fontface="bold", fontsize = 24))
 
-lay.mat <- rbind(c(1, rep(2, 11)),
-                 t(replicate(8, c(6, rep(2, 11)))),
-                 rep(3, 12),
-                 c(4, rep(5, 11)),
-                 t(replicate(8, c(6, rep(5, 11)))),
-                 rep(7, 12))
+
+
+lay.mat <- cbind(MatMake(1, 4), MatMake(2, 4), MatMake(3, 4))
+lay.mat <- rbind(lay.mat, (lay.mat + 3),
+                 rep(7, 9),
+                 (lay.mat + 7), (lay.mat + 11), (lay.mat + 14))
+              
+# 
+# lay.mat <- rbind(c(1, rep(2, 11)),
+#                  t(replicate(8, c(6, rep(2, 11)))),
+#                  rep(3, 12),
+#                  c(4, rep(5, 11)),
+#                  t(replicate(8, c(6, rep(5, 11)))),
+#                  rep(7, 12))
 ```
 
 #### Plotting final plots 
 
-```{r Figure 4 - Interaction plots (full),fig.height = 17, fig.width=10}
-grid.arrange(A, TD.int.plot, line.plot, B, NTD.int.plot, null.plot, full.legend, layout_matrix = lay.mat, padding = unit(0.1, "line"))
+```{r Figure 4 - Interaction plots (full),fig.height = 15, fig.width=10}
+#grid.arrange(A, TD.int.plot, line.plot, B, NTD.int.plot, null.plot, full.legend, layout_matrix = lay.mat, padding = unit(0.1, "line"))
+
+grid.arrange(B, plot.list[[3]] + opts, plot.list[[5]] + opts, 
+             plot.list[[6]] + opts, plot.list[[8]] + opts, plot.list[[11]] + opts,
+             line.plot,
+             A, full.legend, plot.list[[1]] + opts, plot.list[[2]] + opts, plot.list[[4]] + opts,
+             plot.list[[7]] + opts, plot.list[[9]] + opts, plot.list[[10]] + opts, 
+             plot.list[[12]] + opts, 
+             padding = unit(0.1, "line"), layout_matrix = lay.mat)
 
 ```
 
@@ -451,9 +481,9 @@ dist.df <- do.call(rbind, dist.list)
 ```
 
 
-#### Distance from mother - TD (Figure 5 a)
+#### Distance from mother - TD (Figure 5)
 
-```{r Figure 5 a - Distance mother TD}
+```{r Figure 5 - Distance mother TD}
 
 TD.dat      <- subset(dist.df, IS.TD == TRUE) 
 TD.dat$Name <- factor(TD.dat$Name, 
@@ -461,7 +491,7 @@ TD.dat$Name <- factor(TD.dat$Name,
 
 dist.plot <- ggplot(data = TD.dat  , aes(x = round(Frame / (25 * 60) , 2), y = Distance)) + 
   geom_point(size = 0.75, color = 'blue') + labs(color = "Progression") + 
-  labs( y ="Distance (CM)" , x = "Min") + 
+  labs( y ="Distance (cm)" , x = "Min") + 
   theme_grey() +  
   theme(legend.text=element_text(size=16) , legend.position = 'none', axis.title=element_text(size=22)) + 
   geom_vline(aes(xintercept = Excursions / (25 * 60)) , size = 0.75) + scale_y_continuous(breaks = c(100, 300 ,500)) + 
@@ -475,16 +505,16 @@ dist.plot + facet_grid(Name ~ .) + theme(strip.text.y = element_text(size = 22),
 
 
 
-#### Distance from mother - NTD (Figure 5 b)
+#### Distance from mother - NTD (Figure 6)
 
-```{r Figure 5 b - distance mother NTD }
+```{r Figure 6 - distance mother NTD }
 
 NTD.dat <- subset(dist.df, IS.TD == FALSE) 
 NTD.dat$Name <- factor(NTD.dat$Name, 
                        levels = unique(NTD.dat$Name))
 dist.plot <- ggplot(data = NTD.dat  , aes(x = round(Frame / (25 * 60) , 2), y = Distance)) + 
   geom_point(size = 0.75, color = 'red') + labs(color = "Progression") + 
-  labs(y ="Distance (CM)" , x = "Min") + 
+  labs(y ="Distance (cm)" , x = "Min") + 
   theme_grey() +  
   theme(legend.text=element_text(size = 14) , legend.position = 'none', axis.title=element_text(size = 22)) + 
   geom_vline(aes(xintercept = Excursions / (25 * 60) ) , size =0.75 ) + scale_y_continuous(breaks = c(100, 300 ,500)) + 
@@ -528,10 +558,10 @@ sd.ex <- (sd(td.ex)^2 * (length(td.ex) - 1) +
 
 kable(data.frame('Test' = '# Of Excursions Per Minute',
                  'Wilcoxon p-value' =  wilcox.excursion.test$p.value, 
-                 'Abs Difference' = mean(abs.ex.diff) ,
+                 'Abs Difference' = (abs.ex.diff) ,
                  'Statistic' = wilcox.excursion.test$statistic,
                  'SD' = sqrt(sd.ex),
-                 'Effect Size' = median(outer(td.ex, ntd.ex, '-')) / sqrt(sd.ex)), row.names = FALSE)
+                 'Effect Size' =  (abs.ex.diff)  / sqrt(sd.ex)), row.names = FALSE)
 
 ```
 
@@ -581,8 +611,8 @@ true.dist <- mean((subset(x, TD == TRUE)[,3] - subset(x, TD == FALSE)[,3])^2)
 
 temp.dist <- NA
 for (i in 1:1000){
-  time.data.frame.perm[,4] <- TRUE
-  time.data.frame.perm[time.data.frame.perm[,1] %in% sample(unique(parameter.DF$Name), 6),4] <- FALSE
+  time.data.frame.perm[ ,4] <- TRUE
+  time.data.frame.perm[time.data.frame.perm[,1] %in% sample(unique(parameter.DF$Name), sum(!parameter.DF$IS.TD)) ,4] <- FALSE
   x <- aggregate(Time.Spent ~ TD + Distance, time.data.frame.perm, mean)
   temp.dist[i] <- mean((subset(x, TD == TRUE)[,3] - subset(x, TD == FALSE)[,3])^2)
 }
@@ -620,7 +650,7 @@ temp.ex <- NA
 
 for (i in 1:1000){
   vis.data.frame.perm[,4] <- TRUE  
-  vis.data.frame.perm[vis.data.frame.perm[,1] %in% sample(unique(parameter.DF$Name), 6),4] <- FALSE
+  vis.data.frame.perm[vis.data.frame.perm[,1] %in% sample(unique(parameter.DF$Name), sum(!parameter.DF$IS.TD)),4] <- FALSE
   x <- aggregate(Excursion ~ TD + Distance, vis.data.frame.perm, mean)
   temp.ex[i] <- mean((subset(x, TD == TRUE)[,3] - subset(x, TD == FALSE)[,3])^2) 
 }
@@ -637,8 +667,8 @@ p.val.mom.excu <- 1 - mean(true.ex > c(temp.ex, true.ex))
 ## By Condition 
 cond.plot <- ggplot(time.data.frame, aes(x = Distance, y = Time.Spent, color = TD, group = Name)) + 
   geom_line(size = 1.25) + 
-  ggtitle("Percent Time Spent Near Mother ") +
-  labs( y = "% Of Time", x ="Distance from mother (cm)") +
+  ggtitle("Proportion of time spent near mother") +
+  labs( y = "Proportion of time", x = "Distance from mother (cm)") +
   theme(text = element_text(size=22), 
         legend.position = c(0.1, 0.9),
         legend.background = element_blank(),
@@ -651,35 +681,45 @@ cond.plot <- ggplot(time.data.frame, aes(x = Distance, y = Time.Spent, color = T
 
 
 ## Averaged 
-df.cover <- aggregate(Time.Spent ~ TD + Distance, time.data.frame, FUN = function(x) c('Percentage' = mean(x),                                                                           'SD' = sd(x)))
-
+df.cover <- aggregate(Time.Spent ~ TD + Distance, time.data.frame, 
+                      FUN = function(x) c('Percentage' = mean(x),                                                                             'SD' = sd(x)))
 df.cover <- do.call(data.frame, df.cover)
+
+df.cover <- df.cover %>% 
+  mutate('SD' = case_when(TD == TRUE  ~ 2 * Time.Spent.SD / sum(parameter.DF$IS.TD),
+                          TD == FALSE ~ 2 * Time.Spent.SD / (nrow(parameter.DF) - sum(parameter.DF$IS.TD))))
+
 colnames(df.cover) <- c('Group', 'Radius', 'Percentage_Covered', 'SD')
 
 
 ## With CI 
-CI.cover.plot <- ggplot(df.cover, aes(x = Radius, y = Percentage_Covered, color = Group)) + geom_line(size = 1.5) + geom_ribbon(aes(ymin = Percentage_Covered - 1.96 * sqrt(Percentage_Covered * (1 - Percentage_Covered) / 6), ymax = Percentage_Covered + 1.96 * sqrt(Percentage_Covered * (1 - Percentage_Covered) / 6), alpha = 0.05 , fill = Group), show.legend = FALSE) +  ggtitle("Average Percent Of Time Spent Near Mother") + 
-  labs( y = "% Of Time", x ="Distance from mother (cm)")  + theme(text = element_text(size=22), legend.position = 'none') + opts.perm
+CI.cover.plot <- ggplot(df.cover, aes(x = Radius, y = Percentage_Covered, color = Group)) + geom_line(size = 1.5) + geom_ribbon(aes(ymin = Percentage_Covered - SD, ymax = Percentage_Covered + SD, alpha = 0.05 , fill = Group), show.legend = FALSE) +  ggtitle("Average proportion of time spent near mother") + 
+  labs( y = "Proportion of time", x = "Distance from mother (cm)")  + theme(text = element_text(size=22), legend.position = 'none') + opts.perm
 
 
 ## Not Averaged 
 
 ## By Condition 
-vis.plot <- ggplot(vis.data.frame, aes(x = Distance, y = Excursion, color = TD, group = Name)) + geom_line(size = 1.25) + ggtitle("Number Of Visits Per Minute To Mother") +
-  labs( y = "Number Of Excursions Per Minute", x ="Distance from mother (cm)") + theme(text = element_text(size=22), legend.position = 'none') + opts.perm
+vis.plot <- ggplot(vis.data.frame, aes(x = Distance, y = Excursion, color = TD, group = Name)) + geom_line(size = 1.25) + ggtitle("Number of excursions \n to mother per minute") +
+  labs( y = "Number of excursions per minute", x = "Distance from mother (cm)") + theme(text = element_text(size=22), legend.position = 'none') + opts.perm
 
 ## Averaged 
-df.visit <- aggregate(Excursion ~ TD + Distance, vis.data.frame, FUN = function(x) c('Visits' = mean(x),                                                                           'SD' = sd(x)))
-
+df.visit <- aggregate(Excursion ~ TD + Distance, vis.data.frame, 
+                      FUN = function(x) c('Visits' = mean(x), 'SD' = 1.96 *sd(x)))
 df.visit <- do.call(data.frame, df.visit)
-colnames(df.visit) <- c('Group', 'Radius', 'Visits', 'SD')
+df.visit <- df.visit %>% 
+  mutate('SD' = case_when(TD == TRUE  ~ 2 * Excursion.SD / sum(parameter.DF$IS.TD),
+                          TD == FALSE ~ 2 * Excursion.SD / (nrow(parameter.DF) - sum(parameter.DF$IS.TD))))
+
+
+colnames(df.visit) <- c('Group', 'Radius', 'Visits', 'SD', 'Full.SD')
 
 ## With CI
-CI.vis.plot <- ggplot(df.visit, aes(x = Radius, y = Visits, color = Group)) + geom_line(size = 1.5) + geom_ribbon(aes(ymin = Visits - 1.96 * SD * sqrt(1 / 6), ymax = Visits + 1.96 * SD * sqrt(1 / 6), alpha = 0.05 , fill = Group), show.legend = FALSE) +  ggtitle("Average Number Of Visits Per Minute To Mother") +
-  labs( y = "Number Of Excursions Per Minute", x ="Distance from mother (cm)")  +  theme(text = element_text(size=22), legend.position = 'none') + opts.perm
+CI.vis.plot <- ggplot(df.visit, aes(x = Radius, y = Visits, color = Group)) + geom_line(size = 1.5) + geom_ribbon(aes(ymin = Visits - Full.SD, ymax = Visits + Full.SD, alpha = 0.05 , fill = Group), show.legend = FALSE) +  ggtitle("Average number of excursions \n to mother per minute") +
+  labs( y = "Number of excursions per minute", x ="Distance from mother (cm)")  +  theme(text = element_text(size=22), legend.position = 'none') + opts.perm
 
-grid.arrange(cond.plot, CI.cover.plot, vis.plot, CI.vis.plot, layout_matrix = rbind(c(1,2),c(3,4))) 
-
+#grid.arrange(cond.plot, CI.cover.plot, vis.plot, CI.vis.plot, layout_matrix = rbind(c(1,2),c(3,4))) 
+cowplot::plot_grid(cond.plot, CI.cover.plot, vis.plot, CI.vis.plot, nrow = 2, ncol = 2, labels = c('a','b','c','d'), label_size = 18)
 
 ```
 
@@ -700,11 +740,11 @@ kable(data.frame('Tests' = c('% Near mother ~ radius', '# Excursions per minute 
 ```
 
 
-### Mors plots of touching (Figure 6) 
+### Mors plots of touching (Figure 7) 
 
 Mors plot of the frame in which the infant is touching the mother. 
 
-```{r Figure 6 ,warning = FALSE, echo = FALSE, include = FALSE}
+```{r Figure 7 ,warning = FALSE, echo = FALSE, include = FALSE, fig.height= 17, fig.width=10}
 touch.list <- list()
 for (i in 1:length(smooth.see.list)) { 
   temp.df        <- smooth.see.list[[i]]
@@ -712,7 +752,7 @@ for (i in 1:length(smooth.see.list)) {
   temp.name      <- names(smooth.see.list)[i]
   ## Find Mom Center 
   ## Touching 
-  touch.list[[i]]<- data.frame('Name_Infant'   = parameter.DF[i, 'Name'], 
+  touch.list[[i]]<- data.frame('Name_Infant' = parameter.DF[i, 'Name'], 
                                'IS.TD'  = parameter.DF[i, 'IS.TD'],
                                'Frames' = 1:nrow(temp.df),
                                'Touch'  = temp.df[ ,'Touch'])
@@ -802,7 +842,7 @@ full.legend <- get_legend(leg.plot)
 
 
 
-````{r Figure 6} 
+````{r Figure 8,  fig.height= 17, fig.width=10} 
 line.plot <- ggplot(NULL) + geom_abline(slope = 0, intercept = 0.5, size = 3) + opts
 null.plot <- ggplot(NULL) + opts
 
@@ -822,7 +862,7 @@ grid.arrange(A, TD.touch.plot , line.plot, B, NTD.touch.plot, null.plot, layout_
 
 
 
-### Comparing different statistics (Figure 7)
+### Comparing different statistics (Figure 8)
 
 Testing the difference of different statistics (Wilcoxon test), the data was transformed for plotting. 
 \begin{enumerate} 
@@ -944,13 +984,13 @@ k <- length(p.vec)
 
 box.df <- test.df %>% 
   select(-Name) %>%
-  plyr::rename(c('Excursions.100.CM.Per.Minute' = paste('Sqrt Number of \n Excursions Per Minute 100 (cm) \n P =', round(p.vec[1], 4)),
-                 'Time.Mother.Radius.100.CM' = paste('Logit % of Time \n Near Mother 100 (cm) \n P =', round(p.vec[2], 4)), 
-                 'Speed.Prog' = paste('Progression Speed (cm/sec) \n P =', round(p.vec[3], 4)), 
-                 'Avg.Cover' = paste('Logit % Room Covered \n P =', round(p.vec[4], 4)), 
-                 'Touches.Num.Per.Min' = paste('Sqrt # \n Contact Episodes Normalized \n  P =', round(p.vec[6], 4)), 
-                 'Touches.Duration' = paste('Logit % \n Of Contact Time \n  P =', round(p.vec[7], 4)),
-                 'Speed.Outside.Mother.Radius.100.CM' = paste('Speed (cm/sec) outside of \n mother\'s vicinity 100 (cm) \n  P =', round(p.vec[5], 4)))) %>% 
+ plyr::rename(c('Excursions.100.CM.Per.Minute' = paste('Sqrt (# of excursions \n to mother per minute)  \n (distance to mother smaller \n than 100cm)  \n P =', round(p.vec[1], 4)),
+                 'Time.Mother.Radius.100.CM' = paste('Logit proportion of time \n near mother \n (distance to mother smaller \n than 100cm) \n P =', round(p.vec[2], 4)), 
+                 'Speed.Prog' = paste('Average progression \n speed (cm/sec) \n P =', round(p.vec[3], 4)), 
+                 'Avg.Cover' = paste('Logit proportion \n of room covered \n P =', round(p.vec[4], 4)), 
+                 'Touches.Num.Per.Min' = paste('Sqrt (# contact episodes per minute) \n  P =', round(p.vec[6], 4)), 
+                 'Touches.Duration' = paste('Logit proportion \n of contact time \n  P =', round(p.vec[7], 4)),
+                 'Speed.Outside.Mother.Radius.100.CM' = paste('Average speed (cm/sec) outside \n of mother\'s vicinity (distance \n to mother larger than 100cm) \n P =', round(p.vec[5], 4)))) %>% 
   melt(id.var = 'TD') 
 box.df[,'TD'] <- factor(box.df[,'TD'], levels = c('TRUE', 'FALSE'))
 
@@ -996,73 +1036,4 @@ kable(final.test.data, row.names = FALSE)
 ```
 
 
-### T - Tests 
-```{r}
-
-### Transformed data 
-test.df <- data.frame('Name' = parameter.DF$Name, 
-                      'Excursions.100.CM' = sqrt(vis.100), ## Square root 
-                      'Time.Mother.Radius.100.CM' = Logit(time.spent.100), ## logit 
-                      'Speed.Prog' = speed.vec.only.prog,
-                      'Avg.Cover' = Logit(cover.vec), ## logit  maybe can add time.spent.vec
-                      'Speed.Outside.Mother.Radius.100.CM' = dist.temp,
-                      'Touches.Num' = sqrt(touch.num.temp / parameter.DF$Length), ## square root 
-                      'Touches.Duration' = Logit(touch.avg.temp), ## logit 
-                      'TD' = parameter.DF[ ,'IS.TD'])
-
-## Function to control string length 
-swr = function(string, nwrap=25) {
-  paste(strwrap(string, width=nwrap), collapse="\n")
-}
-
-
-p.vec      <- rep(NA, 6)
-diff.vec   <- rep(NA, 6)
-W.vec      <- rep(NA, 6) 
-effect.vec <- rep(NA, 6) 
-sd.vec     <- rep(NA, 6)
-
-for (i in 2:8) { 
-  x.td  <- test.df[test.df['TD'] == TRUE, i]
-  x.ntd <- test.df[test.df['TD'] == FALSE, i]
-  temp.test  <- t.test(x.td, x.ntd)
-  sd.vec[i-1]     <- sqrt((sd(x.td)^2 * (length(x.td) - 1) + sd(x.ntd)^2 * (length(x.ntd) - 1)) / 
-                      (length(x.td) + length(x.ntd) - 2 ))
-  p.vec[i-1]      <- temp.test$p.value
-  W.vec[i-1]      <- temp.test$statistic
-  diff.vec[i-1]   <- abs(mean(x.td) - mean(x.ntd))
-  effect.vec[i-1] <- diff.vec[i-1] / sd.vec[i-1]
-
-}
-
-p.vec.adj    <- p.adjust(p.vec, 'BH')
-names(p.vec) <- colnames(test.df[ ,2:8])
-
-k <- length(p.vec)
-
-
-final.test.data <- data.frame('Tests' = colnames(test.df[ ,2:8]),
-                              'Un-Adjusted P-value' = p.vec, 
-                              'BH P-value' = p.vec.adj,
-                              'Abs Difference' = diff.vec,
-                              'Statistic' = W.vec,
-                              'SD' = (sd.vec),
-                              'Effect Size' = diff.vec / (sd.vec)) %>% 
-  arrange(Un.Adjusted.P.value) 
-
-kable(final.test.data, row.names = FALSE)
-
-```
-
-### Testing Length 
-
-```{r}
-
-t.test(parameter.DF$Length[parameter.DF$IS.TD == TRUE],
-       parameter.DF$Length[parameter.DF$IS.TD == FALSE], exact = TRUE)
-mean(parameter.DF$Length[parameter.DF$IS.TD == TRUE])
-mean(parameter.DF$Length[parameter.DF$IS.TD == FALSE])
-sd(parameter.DF$Length[parameter.DF$IS.TD == TRUE])
-sd(parameter.DF$Length[parameter.DF$IS.TD == FALSE])
-```
 
