@@ -1,13 +1,13 @@
-"Name","MovingMedCutOffValue","HalfWindowWidth","Arrests","Begin","End","IS.TD","Link","Threshold"
-"Adva",1.5,2,5,2492,49942,FALSE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Adva/Movment/Adva Coordinates Linear Smoothed Ethovision Cut.csv",11.814462
-"Dean",1.5,2,15,2155,48917,FALSE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Dean/Movment/Dean Coordinates Linear Smoothed Etohovision Cut.csv",5.703427
-"Alon",1.5,2,5,572,47200,TRUE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Alon/Movment/Alon Coordinates Linear Completed Ethovision Cut.csv",22.664709
-"Evyatar",1.5,2,5,530,30450,FALSE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Evyatar/Movment/Evyatar Coordinates Ethovision Cut.csv",10.929478
-"Omri",1.5,2,12,777,41021,TRUE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Omri/Movment/Omri Coordinates Ethovision Cut.csv",5.36458
-"Almog",1.5,2,5,571,47341,TRUE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Almog/Movment/Almog Coordinates Linear Smoothed Ethovision Cut.csv",10.897246
-"Tom",1.5,2,15,255,29617,FALSE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Tom/Movment/Tom Coordinates Etohovision Cut.csv",11.476651
-"Dan",2,2,5,204,43027,TRUE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Dan/Movment/Dan Coordinates Linear Smoothed Ethovision Cut.csv",22.361105
-"Alexey",2,2,5,1041,39660,TRUE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Alexey/Movment/Alexey Coordinates Linear Completed Ethovision Cut.csv",16.633867
-"Yuri",1.5,2,15,4310,32512,FALSE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Yuri/Movment/Yuri Coordinates Linear Smoothed EthovisionV2 Cut.csv",4.9348
-"Yoram",1.5,2.75,10,430,48654,TRUE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Yoram/Movment/Yoram Coordinates Linear Smoothed Ethovision Cut.csv",8.541417
-"Shuval",1.5,2,15,1134,41620,FALSE,"C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Shuval/Movment/Shuval Coordinates Linear Interpolation Ethovision Cut.csv",8.277488
+Name,MovingMedCutOffValue,HalfWindowWidth,Arrests,Begin,End,IS.TD,Link,Threshold
+Adva,1.5,2,5,2492,49942,FALSE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Adva/Movment/Adva Coordinates Linear Smoothed Ethovision Cut.csv,11.814462
+Dean,1.5,2,15,2155,48917,FALSE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Dean/Movment/Dean Coordinates Linear Smoothed Etohovision Cut.csv,5.703427
+Alon,1.5,2,5,572,47200,TRUE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Alon/Movment/Alon Coordinates Linear Completed Ethovision Cut.csv,22.664709
+Evyatar,1.5,2,5,530,30450,FALSE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Evyatar/Movment/Evyatar Coordinates Ethovision Cut.csv,10.929478
+Omri,1.5,2,12,777,41021,TRUE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Omri/Movment/Omri Coordinates Ethovision Cut.csv,5.36458
+Almog,1.5,2,5,571,47341,TRUE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Almog/Movment/Almog Coordinates Linear Smoothed Ethovision Cut.csv,10.897246
+Tom,1.5,2,15,255,29617,FALSE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Tom/Movment/Tom Coordinates Etohovision Cut.csv,11.476651
+Dan,2,2,5,204,43027,TRUE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Dan/Movment/Dan Coordinates Linear Smoothed Ethovision Cut.csv,22.361105
+Alexey,2,2,5,1041,39660,FALSE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Alexey/Movment/Alexey Coordinates Linear Completed Ethovision Cut.csv,16.633867
+Yuri,1.5,2,15,4310,32512,FALSE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Yuri/Movment/Yuri Coordinates Linear Smoothed EthovisionV2 Cut.csv,4.9348
+Yoram,1.5,2.75,10,430,48654,TRUE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Yoram/Movment/Yoram Coordinates Linear Smoothed Ethovision Cut.csv,8.541417
+Shuval,1.5,2,15,1134,41620,FALSE,C:/Users/Tzviel/Google Drive/eLife - Final Submission/Infants Analysis - Git/Infants Data/Shuval/Movment/Shuval Coordinates Linear Interpolation Ethovision Cut.csv,8.277488

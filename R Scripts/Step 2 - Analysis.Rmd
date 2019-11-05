@@ -491,7 +491,7 @@ TD.dat$Name <- factor(TD.dat$Name,
 
 dist.plot <- ggplot(data = TD.dat  , aes(x = round(Frame / (25 * 60) , 2), y = Distance)) + 
   geom_point(size = 0.75, color = 'blue') + labs(color = "Progression") + 
-  labs( y ="Distance (cm)" , x = "Min") + 
+  labs( y ="Distance (cm)" , x = "Time (min)") + 
   theme_grey() +  
   theme(legend.text=element_text(size=16) , legend.position = 'none', axis.title=element_text(size=22)) + 
   geom_vline(aes(xintercept = Excursions / (25 * 60)) , size = 0.75) + scale_y_continuous(breaks = c(100, 300 ,500)) + 
@@ -514,7 +514,7 @@ NTD.dat$Name <- factor(NTD.dat$Name,
                        levels = unique(NTD.dat$Name))
 dist.plot <- ggplot(data = NTD.dat  , aes(x = round(Frame / (25 * 60) , 2), y = Distance)) + 
   geom_point(size = 0.75, color = 'red') + labs(color = "Progression") + 
-  labs(y ="Distance (cm)" , x = "Min") + 
+  labs(y ="Distance (cm)" , x = "Time (min)") + 
   theme_grey() +  
   theme(legend.text=element_text(size = 14) , legend.position = 'none', axis.title=element_text(size = 22)) + 
   geom_vline(aes(xintercept = Excursions / (25 * 60) ) , size =0.75 ) + scale_y_continuous(breaks = c(100, 300 ,500)) + 
@@ -792,9 +792,9 @@ touch.df.NTD <- touch.df %>% filter(IS.TD == FALSE)
 
 ### Plotting 
 ## TD 
-TD.touch.plot <- touch.df.TD %>% ggplot(aes(y = 1, x = Frame_Touch)) + 
+TD.touch.plot <- touch.df.TD %>% ggplot(aes(y = 1, x = round(Frame_Touch / (25 * 60) , 2))) + 
   geom_point(size = 2, color = 'blue') + 
-    geom_vline(aes(xintercept = n), size = 1.5) + 
+    geom_vline(aes(xintercept = round(n / (25 * 60) , 2)), size = 1.5) + 
   facet_grid(Name_Infant ~ .) + opts.perm +
   theme(axis.title.x = element_blank(),
         axis.text = element_blank(),
@@ -807,16 +807,16 @@ TD.touch.plot <- touch.df.TD %>% ggplot(aes(y = 1, x = Frame_Touch)) +
 
 ## NTD 
 
-NTD.touch.plot <- touch.df.NTD %>% ggplot(aes(y = 1, x = Frame_Touch)) + 
+NTD.touch.plot <- touch.df.NTD %>% ggplot(aes(y = 1, x = round(Frame_Touch / (25 * 60) , 2))) + 
   geom_point(size = 2, color = 'red') + 
-    geom_vline(aes(xintercept = n), size = 1.5) +
+    geom_vline(aes(xintercept = round(n / (25 * 60) , 2)), size = 1.5) +
   facet_grid(Name_Infant ~ .) + opts.perm + 
   theme(axis.text.y = element_blank(),
         axis.ticks.y = element_blank(),
         axis.line.y = element_blank(),
         panel.spacing = unit(0.75, "lines"),
         strip.text = element_text(size = 8)) + 
-  xlab('Frames') +
+  xlab('Time (min)') +
   ylab('Touch') 
    
 
@@ -988,7 +988,7 @@ box.df <- test.df %>%
                  'Time.Mother.Radius.100.CM' = paste('Logit proportion of time \n near mother \n (distance to mother smaller \n than 100cm) \n P =', round(p.vec[2], 4)), 
                  'Speed.Prog' = paste('Average progression \n speed (cm/sec) \n P =', round(p.vec[3], 4)), 
                  'Avg.Cover' = paste('Logit proportion \n of room covered \n P =', round(p.vec[4], 4)), 
-                 'Touches.Num.Per.Min' = paste('Sqrt (# contact episodes per minute) \n  P =', round(p.vec[6], 4)), 
+                 'Touches.Num.Per.Min' = paste('Sqrt (# contact \n episodes per minute) \n  P =', round(p.vec[6], 4)), 
                  'Touches.Duration' = paste('Logit proportion \n of contact time \n  P =', round(p.vec[7], 4)),
                  'Speed.Outside.Mother.Radius.100.CM' = paste('Average speed (cm/sec) outside \n of mother\'s vicinity (distance \n to mother larger than 100cm) \n P =', round(p.vec[5], 4)))) %>% 
   melt(id.var = 'TD') 
