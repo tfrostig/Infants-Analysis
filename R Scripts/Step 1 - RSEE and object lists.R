@@ -1,6 +1,3 @@
-## Can be downloaded using
-## install.packages("RSEE", repos=c("http://cs.tau.ac.il/~itamares/rsee/R","http://cran.r-project.org"))
-
 ## Loading functions 
 source('R Scripts/Package required.R')
 source('R Scripts/Functions.R')
