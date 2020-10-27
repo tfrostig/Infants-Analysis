@@ -13,7 +13,6 @@ editor_options:
 
 
 ```{r setup, include=FALSE}
-
 source.dir  <- here::here()
 setwd(source.dir)
 
@@ -21,8 +20,8 @@ set.seed(999)
 knitr::opts_chunk$set(echo = F,
                       warning = F,
                       message = F,
-                      fig.width = 1, # 16
-                      fig.height = 1, # 14
+                      fig.width = 16, 
+                      fig.height = 14, 
                       dpi = 30, # 150
                       fig.path = paste0(source.dir,'/Output/Images/'))
 
